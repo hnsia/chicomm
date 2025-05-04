@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/hnsia/chicomm/chicomm-api/server"
+	"github.com/hnsia/chicomm/chicomm-api/storer"
 	"github.com/hnsia/chicomm/db"
 )
 
@@ -15,5 +17,7 @@ func main() {
 	log.Println("successfully connected to db")
 
 	// do something with the db
-	// st := storer.NewMySQLStorer(db.GetDB())
+	st := storer.NewMySQLStorer(db.GetDB())
+	_ = server.NewServer(st)
+	// hdl := handler.NewHandler(srv)
 }
