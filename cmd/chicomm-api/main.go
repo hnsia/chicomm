@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/hnsia/chicomm/chicomm-api/handler"
 	"github.com/hnsia/chicomm/chicomm-api/server"
 	"github.com/hnsia/chicomm/chicomm-api/storer"
 	"github.com/hnsia/chicomm/db"
@@ -18,6 +19,8 @@ func main() {
 
 	// do something with the db
 	st := storer.NewMySQLStorer(db.GetDB())
-	_ = server.NewServer(st)
-	// hdl := handler.NewHandler(srv)
+	srv := server.NewServer(st)
+	hdl := handler.NewHandler(srv)
+	handler.RegisterRoutes(hdl)
+	handler.Start(":8080")
 }
