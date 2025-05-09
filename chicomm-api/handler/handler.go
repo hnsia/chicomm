@@ -316,3 +316,41 @@ func toOrderItems(items []storer.OrderItem) []OrderItem {
 	}
 	return res
 }
+
+func (h *handler) createUser(w http.ResponseWriter, r *http.Request) {
+	var u UserReq
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	// hash password
+
+	createdUser, err := h.server.CreateUser(h.ctx, toStorerUser(u))
+	if err != nil {
+		http.Error(w, "error creating user", http.StatusInternalServerError)
+		return
+	}
+
+	res := toUserRes(createdUser)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(res)
+}
+
+func toStorerUser(u UserReq) *storer.User {
+	return &storer.User{
+		Name:     u.Name,
+		Email:    u.Email,
+		Password: u.Password,
+		IsAdmin:  u.IsAdmin,
+	}
+}
+
+func toUserRes(u *storer.User) UserRes {
+	return UserRes{
+		Name:    u.Name,
+		Email:   u.Email,
+		IsAdmin: u.IsAdmin,
+	}
+}

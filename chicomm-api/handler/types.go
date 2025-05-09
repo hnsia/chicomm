@@ -53,3 +53,20 @@ type OrderRes struct {
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     *time.Time  `json:"updated_at"`
 }
+
+type UserReq struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
+type UserRes struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	IsAdmin bool   `json:"is_admin"`
+}
+
+type ListUserRes struct {
+	Users []UserRes `json:"users"`
+}
