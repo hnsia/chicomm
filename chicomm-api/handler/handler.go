@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/hnsia/chicomm/chicomm-api/server"
 	"github.com/hnsia/chicomm/chicomm-api/storer"
+	"github.com/hnsia/chicomm/util"
 )
 
 type handler struct {
@@ -325,6 +326,12 @@ func (h *handler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// hash password
+	hashedPassword, err := util.HashPassword(u.Password)
+	if err != nil {
+		http.Error(w, "error hashing password", http.StatusInternalServerError)
+		return
+	}
+	u.Password = hashedPassword
 
 	createdUser, err := h.server.CreateUser(h.ctx, toStorerUser(u))
 	if err != nil {
@@ -353,4 +360,86 @@ func toUserRes(u *storer.User) UserRes {
 		Email:   u.Email,
 		IsAdmin: u.IsAdmin,
 	}
+}
+
+func (h *handler) listUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.server.ListUsers(h.ctx)
+	if err != nil {
+		http.Error(w, "error listing users", http.StatusInternalServerError)
+		return
+	}
+
+	var res ListUserRes
+	for _, u := range users {
+		res.Users = append(res.Users, toUserRes(&u))
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
+}
+
+func (h *handler) updateUser(w http.ResponseWriter, r *http.Request) {
+	// we will later get user email from token payload of the authenticated user
+	var u UserReq
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.server.GetUser(h.ctx, u.Email)
+	if err != nil {
+		http.Error(w, "error getting user", http.StatusInternalServerError)
+		return
+	}
+
+	// patch our user request
+	patchUserReq(user, u)
+
+	updatedUser, err := h.server.UpdateUser(h.ctx, user)
+	if err != nil {
+		http.Error(w, "error updating user", http.StatusInternalServerError)
+		return
+	}
+
+	res := toUserRes(updatedUser)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
+}
+
+func patchUserReq(user *storer.User, u UserReq) {
+	if u.Name != "" {
+		user.Name = u.Name
+	}
+	if u.Email != "" {
+		user.Email = u.Email
+	}
+	if u.Password != "" {
+		hashedPassword, err := util.HashPassword(u.Password)
+		if err != nil {
+			panic(err)
+		}
+		user.Password = hashedPassword
+	}
+	if u.IsAdmin {
+		user.IsAdmin = u.IsAdmin
+	}
+	user.UpdatedAt = toTimePtr(time.Now())
+}
+
+func (h *handler) deleteUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	i, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		http.Error(w, "error parsing user id", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.server.DeleteUser(h.ctx, i); err != nil {
+		http.Error(w, "error deleting user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
