@@ -10,18 +10,21 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/hnsia/chicomm/chicomm-api/server"
 	"github.com/hnsia/chicomm/chicomm-api/storer"
+	"github.com/hnsia/chicomm/token"
 	"github.com/hnsia/chicomm/util"
 )
 
 type handler struct {
-	ctx    context.Context
-	server *server.Server
+	ctx        context.Context
+	server     *server.Server
+	tokenMaker *token.JWTMaker
 }
 
-func NewHandler(server *server.Server) *handler {
+func NewHandler(server *server.Server, secretKey string) *handler {
 	return &handler{
-		ctx:    context.Background(),
-		server: server,
+		ctx:        context.Background(),
+		server:     server,
+		tokenMaker: token.NewJWTMaker(secretKey),
 	}
 }
 
@@ -442,4 +445,26 @@ func (h *handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *handler) loginUser(w http.ResponseWriter, r *http.Request) {
+	var u LoginUserReq
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.server.GetUser(h.ctx, u.Email)
+	if err != nil {
+		http.Error(w, "error getting user", http.StatusInternalServerError)
+		return
+	}
+
+	if err := util.CheckPassword(u.Password, user.Password); err != nil {
+		http.Error(w, "wrong password", http.StatusUnauthorized)
+		return
+	}
+
+	// create a json web token (JWT) and return it as response
+	w.WriteHeader(http.StatusOK)
 }
