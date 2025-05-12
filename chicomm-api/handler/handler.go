@@ -466,5 +466,40 @@ func (h *handler) loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create a json web token (JWT) and return it as response
+	accessToken, accessClaims, err := h.tokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 15*time.Minute)
+	if err != nil {
+		http.Error(w, "error creating access token", http.StatusInternalServerError)
+		return
+	}
+
+	refreshToken, refreshClaims, err := h.tokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 24*time.Hour)
+	if err != nil {
+		http.Error(w, "error creating refresh token", http.StatusInternalServerError)
+		return
+	}
+
+	session, err := h.server.CreateSession(h.ctx, &storer.Session{
+		ID:           refreshClaims.RegisteredClaims.ID,
+		UserEmail:    user.Email,
+		RefreshToken: refreshToken,
+		IsRevoked:    false,
+		ExpiresAt:    refreshClaims.RegisteredClaims.ExpiresAt.Time,
+	})
+	if err != nil {
+		http.Error(w, "error creating session", http.StatusInternalServerError)
+		return
+	}
+
+	res := LoginUserRes{
+		SessionID:             session.ID,
+		AccessToken:           accessToken,
+		RefreshToken:          refreshToken,
+		AccessTokenExpiresAt:  accessClaims.RegisteredClaims.ExpiresAt.Time,
+		RefreshTokenExpiresAt: refreshClaims.RegisteredClaims.ExpiresAt.Time,
+		User:                  toUserRes(user),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
