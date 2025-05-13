@@ -503,3 +503,79 @@ func (h *handler) loginUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }
+
+func (h *handler) logoutUser(w http.ResponseWriter, r *http.Request) {
+	// we will later get the session ID from the token payload of the authenticated user
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "missing session ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.server.DeleteSession(h.ctx, id); err != nil {
+		http.Error(w, "error deleting session", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *handler) renewAccessToken(w http.ResponseWriter, r *http.Request) {
+	var req RenewAccessTokenReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	refreshClaims, err := h.tokenMaker.VerifyToken(req.RefreshToken)
+	if err != nil {
+		http.Error(w, "error verifying token", http.StatusUnauthorized)
+		return
+	}
+
+	session, err := h.server.GetSession(h.ctx, refreshClaims.RegisteredClaims.ID)
+	if err != nil {
+		http.Error(w, "error getting session", http.StatusInternalServerError)
+		return
+	}
+
+	if session.IsRevoked {
+		http.Error(w, "session is revoked", http.StatusUnauthorized)
+		return
+	}
+
+	if session.UserEmail != refreshClaims.Email {
+		http.Error(w, "invalid session", http.StatusUnauthorized)
+		return
+	}
+
+	accessToken, accessClaims, err := h.tokenMaker.CreateToken(refreshClaims.ID, refreshClaims.Email, refreshClaims.IsAdmin, 15*time.Minute)
+	if err != nil {
+		http.Error(w, "error creating access token", http.StatusInternalServerError)
+		return
+	}
+
+	res := RenewAccessTokenRes{
+		AccessToken:          accessToken,
+		AccessTokenExpiresAt: accessClaims.RegisteredClaims.ExpiresAt.Time,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
+}
+
+func (h *handler) revokeSession(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "missing session ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.server.RevokeSession(h.ctx, id); err != nil {
+		http.Error(w, "error revoking session", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
