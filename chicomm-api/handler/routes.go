@@ -10,25 +10,33 @@ var r *chi.Mux
 
 func RegisterRoutes(handler *handler) *chi.Mux {
 	r = chi.NewRouter()
+	tokenMaker := handler.TokenMaker
 
 	r.Route("/products", func(r chi.Router) {
-		r.Post("/", handler.createProduct)
+		r.With(GetAdminMiddlewareFunc(tokenMaker)).Post("/", handler.createProduct)
 		r.Get("/", handler.listProducts)
 
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", handler.getProduct)
-			r.Patch("/", handler.updateProduct)
-			r.Delete("/", handler.deleteProduct)
+			r.Group(func(r chi.Router) {
+				r.Use(GetAdminMiddlewareFunc(tokenMaker))
+				r.Patch("/", handler.updateProduct)
+				r.Delete("/", handler.deleteProduct)
+			})
 		})
 	})
 
-	r.Route("/orders", func(r chi.Router) {
-		r.Post("/", handler.createOrder)
-		r.Get("/", handler.listOrders)
+	r.Group(func(r chi.Router) {
+		r.Use(GetAuthMiddlewareFunc(tokenMaker))
 
-		r.Route("/{id}", func(r chi.Router) {
-			r.Get("/", handler.getOrder)
-			r.Delete("/", handler.deleteOrder)
+		r.Route("/orders", func(r chi.Router) {
+			r.Post("/", handler.createOrder)
+			r.Get("/", handler.listOrders)
+
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", handler.getOrder)
+				r.Delete("/", handler.deleteOrder)
+			})
 		})
 	})
 

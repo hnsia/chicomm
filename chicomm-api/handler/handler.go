@@ -17,14 +17,14 @@ import (
 type handler struct {
 	ctx        context.Context
 	server     *server.Server
-	tokenMaker *token.JWTMaker
+	TokenMaker *token.JWTMaker
 }
 
 func NewHandler(server *server.Server, secretKey string) *handler {
 	return &handler{
 		ctx:        context.Background(),
 		server:     server,
-		tokenMaker: token.NewJWTMaker(secretKey),
+		TokenMaker: token.NewJWTMaker(secretKey),
 	}
 }
 
@@ -466,13 +466,13 @@ func (h *handler) loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create a json web token (JWT) and return it as response
-	accessToken, accessClaims, err := h.tokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 15*time.Minute)
+	accessToken, accessClaims, err := h.TokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 15*time.Minute)
 	if err != nil {
 		http.Error(w, "error creating access token", http.StatusInternalServerError)
 		return
 	}
 
-	refreshToken, refreshClaims, err := h.tokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 24*time.Hour)
+	refreshToken, refreshClaims, err := h.TokenMaker.CreateToken(user.ID, user.Email, user.IsAdmin, 24*time.Hour)
 	if err != nil {
 		http.Error(w, "error creating refresh token", http.StatusInternalServerError)
 		return
@@ -527,7 +527,7 @@ func (h *handler) renewAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshClaims, err := h.tokenMaker.VerifyToken(req.RefreshToken)
+	refreshClaims, err := h.TokenMaker.VerifyToken(req.RefreshToken)
 	if err != nil {
 		http.Error(w, "error verifying token", http.StatusUnauthorized)
 		return
@@ -549,7 +549,7 @@ func (h *handler) renewAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, accessClaims, err := h.tokenMaker.CreateToken(refreshClaims.ID, refreshClaims.Email, refreshClaims.IsAdmin, 15*time.Minute)
+	accessToken, accessClaims, err := h.TokenMaker.CreateToken(refreshClaims.ID, refreshClaims.Email, refreshClaims.IsAdmin, 15*time.Minute)
 	if err != nil {
 		http.Error(w, "error creating access token", http.StatusInternalServerError)
 		return
