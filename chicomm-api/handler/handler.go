@@ -205,7 +205,11 @@ func (h *handler) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdOrder, err := h.server.CreateOrder(h.ctx, toStorerOrder(o))
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
+	so := toStorerOrder(o)
+	so.UserID = claims.ID
+
+	createdOrder, err := h.server.CreateOrder(h.ctx, so)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -218,14 +222,9 @@ func (h *handler) createOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) getOrder(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	i, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		http.Error(w, "error parsing order id", http.StatusBadRequest)
-		return
-	}
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
 
-	order, err := h.server.GetOrder(h.ctx, i)
+	order, err := h.server.GetOrder(h.ctx, claims.ID)
 	if err != nil {
 		http.Error(w, "error getting order", http.StatusInternalServerError)
 		return
@@ -383,12 +382,13 @@ func (h *handler) listUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) updateUser(w http.ResponseWriter, r *http.Request) {
-	// we will later get user email from token payload of the authenticated user
 	var u UserReq
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, "error decoding request body", http.StatusBadRequest)
 		return
 	}
+
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
 
 	user, err := h.server.GetUser(h.ctx, u.Email)
 	if err != nil {
@@ -398,6 +398,9 @@ func (h *handler) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	// patch our user request
 	patchUserReq(user, u)
+	if user.Email == "" {
+		user.Email = claims.Email
+	}
 
 	updatedUser, err := h.server.UpdateUser(h.ctx, user)
 	if err != nil {
@@ -505,14 +508,9 @@ func (h *handler) loginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) logoutUser(w http.ResponseWriter, r *http.Request) {
-	// we will later get the session ID from the token payload of the authenticated user
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		http.Error(w, "missing session ID", http.StatusBadRequest)
-		return
-	}
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
 
-	if err := h.server.DeleteSession(h.ctx, id); err != nil {
+	if err := h.server.DeleteSession(h.ctx, claims.RegisteredClaims.ID); err != nil {
 		http.Error(w, "error deleting session", http.StatusInternalServerError)
 		return
 	}
@@ -566,13 +564,9 @@ func (h *handler) renewAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) revokeSession(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		http.Error(w, "missing session ID", http.StatusBadRequest)
-		return
-	}
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
 
-	if err := h.server.RevokeSession(h.ctx, id); err != nil {
+	if err := h.server.RevokeSession(h.ctx, claims.RegisteredClaims.ID); err != nil {
 		http.Error(w, "error revoking session", http.StatusInternalServerError)
 		return
 	}
