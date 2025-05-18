@@ -11,3 +11,11 @@
 1. Run `docker run -it --rm --network host --volume "$(pwd)/db:/db" migrate/migrate:v4.17.0 create -ext sql -dir /db/migrations init_schema` to create migration scripts
 2. Run `docker run -it --rm --network host --volume "$(pwd)/db:/db" migrate/migrate:v4.17.0 -path=/db/migrations -database "mysql://root:password@tcp(localhost:3305)/chicomm" up` to migrate up
 3. Run `docker run -it --rm --network host --volume "$(pwd)/db:/db" migrate/migrate:v4.17.0 -path=/db/migrations -database "mysql://root:password@tcp(localhost:3305)/chicomm" down` to migrate down
+
+# To generate grpc code
+1. Run 
+```
+protoc --proto_path=chicomm-grpc/pb --go_out=chicomm-grpc/pb --go_opt=paths=source_relative \
+    --go-grpc_out=chicomm-grpc/pb --go-grpc_opt=paths=source_relative \
+    chicomm-grpc/pb/api.proto
+```
