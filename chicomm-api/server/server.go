@@ -6,6 +6,8 @@ import (
 	"github.com/hnsia/chicomm/chicomm-api/storer"
 )
 
+// TODO: to remove this file/folder
+
 type Server struct {
 	storer *storer.MySQLStorer
 }

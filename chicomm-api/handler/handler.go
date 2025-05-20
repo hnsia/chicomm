@@ -8,22 +8,22 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/hnsia/chicomm/chicomm-api/server"
 	"github.com/hnsia/chicomm/chicomm-api/storer"
+	"github.com/hnsia/chicomm/chicomm-grpc/pb"
 	"github.com/hnsia/chicomm/token"
 	"github.com/hnsia/chicomm/util"
 )
 
 type handler struct {
 	ctx        context.Context
-	server     *server.Server
+	client     pb.ChicommClient
 	TokenMaker *token.JWTMaker
 }
 
-func NewHandler(server *server.Server, secretKey string) *handler {
+func NewHandler(client pb.ChicommClient, secretKey string) *handler {
 	return &handler{
 		ctx:        context.Background(),
-		server:     server,
+		client:     client,
 		TokenMaker: token.NewJWTMaker(secretKey),
 	}
 }
