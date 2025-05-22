@@ -244,8 +244,8 @@ func (ms *MySQLStorer) GetUser(ctx context.Context, email string) (*User, error)
 	return &u, nil
 }
 
-func (ms *MySQLStorer) ListUsers(ctx context.Context) ([]User, error) {
-	var users []User
+func (ms *MySQLStorer) ListUsers(ctx context.Context) ([]*User, error) {
+	var users []*User
 	err := ms.db.SelectContext(ctx, &users, "SELECT * FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("error listing users: %w", err)

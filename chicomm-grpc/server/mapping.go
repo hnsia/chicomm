@@ -74,7 +74,7 @@ func toTimePtr(t time.Time) *time.Time {
 	return &t
 }
 
-func toStoreOrder(o *pb.OrderReq) *storer.Order {
+func toStorerOrder(o *pb.OrderReq) *storer.Order {
 	return &storer.Order{
 		PaymentMethod: o.PaymentMethod,
 		TaxPrice:      o.TaxPrice,
