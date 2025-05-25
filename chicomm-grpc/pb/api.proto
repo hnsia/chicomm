@@ -44,6 +44,12 @@ message OrderItem {
     int64 product_id = 5;
 }
 
+enum OrderStatus {
+    PENDING = 0;
+    SHIPPED = 1;
+    DELIVERED = 2;
+}
+
 message OrderReq {
     int64 id = 1;
     repeated OrderItem items = 2;
@@ -52,6 +58,8 @@ message OrderReq {
     float shipping_price = 5;
     float total_price = 6;
     int64 user_id = 7;
+    string user_email = 8;
+    OrderStatus status = 9;
 }
 
 message OrderRes {
@@ -64,6 +72,7 @@ message OrderRes {
     int64 user_id = 7;
     google.protobuf.Timestamp created_at = 8;
     google.protobuf.Timestamp updated_at = 9;
+    OrderStatus status = 10;
 }
 
 message ListOrderRes {
@@ -117,6 +126,7 @@ service chicomm {
     rpc CreateOrder(OrderReq) returns (OrderRes) {}
     rpc GetOrder(OrderReq) returns (OrderRes) {}
     rpc ListOrders(OrderReq) returns (ListOrderRes) {}
+    rpc UpdateOrderStatus(OrderReq) returns (OrderRes) {}
     rpc DeleteOrder(OrderReq) returns (OrderRes) {}
 
     rpc CreateUser(UserReq) returns (UserRes) {}

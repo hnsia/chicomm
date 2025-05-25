@@ -19,24 +19,25 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Chicomm_CreateProduct_FullMethodName = "/pb.chicomm/CreateProduct"
-	Chicomm_GetProduct_FullMethodName    = "/pb.chicomm/GetProduct"
-	Chicomm_ListProducts_FullMethodName  = "/pb.chicomm/ListProducts"
-	Chicomm_UpdateProduct_FullMethodName = "/pb.chicomm/UpdateProduct"
-	Chicomm_DeleteProduct_FullMethodName = "/pb.chicomm/DeleteProduct"
-	Chicomm_CreateOrder_FullMethodName   = "/pb.chicomm/CreateOrder"
-	Chicomm_GetOrder_FullMethodName      = "/pb.chicomm/GetOrder"
-	Chicomm_ListOrders_FullMethodName    = "/pb.chicomm/ListOrders"
-	Chicomm_DeleteOrder_FullMethodName   = "/pb.chicomm/DeleteOrder"
-	Chicomm_CreateUser_FullMethodName    = "/pb.chicomm/CreateUser"
-	Chicomm_GetUser_FullMethodName       = "/pb.chicomm/GetUser"
-	Chicomm_ListUsers_FullMethodName     = "/pb.chicomm/ListUsers"
-	Chicomm_UpdateUser_FullMethodName    = "/pb.chicomm/UpdateUser"
-	Chicomm_DeleteUser_FullMethodName    = "/pb.chicomm/DeleteUser"
-	Chicomm_CreateSession_FullMethodName = "/pb.chicomm/CreateSession"
-	Chicomm_GetSession_FullMethodName    = "/pb.chicomm/GetSession"
-	Chicomm_RevokeSession_FullMethodName = "/pb.chicomm/RevokeSession"
-	Chicomm_DeleteSession_FullMethodName = "/pb.chicomm/DeleteSession"
+	Chicomm_CreateProduct_FullMethodName     = "/pb.chicomm/CreateProduct"
+	Chicomm_GetProduct_FullMethodName        = "/pb.chicomm/GetProduct"
+	Chicomm_ListProducts_FullMethodName      = "/pb.chicomm/ListProducts"
+	Chicomm_UpdateProduct_FullMethodName     = "/pb.chicomm/UpdateProduct"
+	Chicomm_DeleteProduct_FullMethodName     = "/pb.chicomm/DeleteProduct"
+	Chicomm_CreateOrder_FullMethodName       = "/pb.chicomm/CreateOrder"
+	Chicomm_GetOrder_FullMethodName          = "/pb.chicomm/GetOrder"
+	Chicomm_ListOrders_FullMethodName        = "/pb.chicomm/ListOrders"
+	Chicomm_UpdateOrderStatus_FullMethodName = "/pb.chicomm/UpdateOrderStatus"
+	Chicomm_DeleteOrder_FullMethodName       = "/pb.chicomm/DeleteOrder"
+	Chicomm_CreateUser_FullMethodName        = "/pb.chicomm/CreateUser"
+	Chicomm_GetUser_FullMethodName           = "/pb.chicomm/GetUser"
+	Chicomm_ListUsers_FullMethodName         = "/pb.chicomm/ListUsers"
+	Chicomm_UpdateUser_FullMethodName        = "/pb.chicomm/UpdateUser"
+	Chicomm_DeleteUser_FullMethodName        = "/pb.chicomm/DeleteUser"
+	Chicomm_CreateSession_FullMethodName     = "/pb.chicomm/CreateSession"
+	Chicomm_GetSession_FullMethodName        = "/pb.chicomm/GetSession"
+	Chicomm_RevokeSession_FullMethodName     = "/pb.chicomm/RevokeSession"
+	Chicomm_DeleteSession_FullMethodName     = "/pb.chicomm/DeleteSession"
 )
 
 // ChicommClient is the client API for Chicomm service.
@@ -51,6 +52,7 @@ type ChicommClient interface {
 	CreateOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderRes, error)
 	GetOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderRes, error)
 	ListOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*ListOrderRes, error)
+	UpdateOrderStatus(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderRes, error)
 	DeleteOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderRes, error)
 	CreateUser(ctx context.Context, in *UserReq, opts ...grpc.CallOption) (*UserRes, error)
 	GetUser(ctx context.Context, in *UserReq, opts ...grpc.CallOption) (*UserRes, error)
@@ -145,6 +147,16 @@ func (c *chicommClient) ListOrders(ctx context.Context, in *OrderReq, opts ...gr
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListOrderRes)
 	err := c.cc.Invoke(ctx, Chicomm_ListOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chicommClient) UpdateOrderStatus(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrderRes)
+	err := c.cc.Invoke(ctx, Chicomm_UpdateOrderStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -263,6 +275,7 @@ type ChicommServer interface {
 	CreateOrder(context.Context, *OrderReq) (*OrderRes, error)
 	GetOrder(context.Context, *OrderReq) (*OrderRes, error)
 	ListOrders(context.Context, *OrderReq) (*ListOrderRes, error)
+	UpdateOrderStatus(context.Context, *OrderReq) (*OrderRes, error)
 	DeleteOrder(context.Context, *OrderReq) (*OrderRes, error)
 	CreateUser(context.Context, *UserReq) (*UserRes, error)
 	GetUser(context.Context, *UserReq) (*UserRes, error)
@@ -306,6 +319,9 @@ func (UnimplementedChicommServer) GetOrder(context.Context, *OrderReq) (*OrderRe
 }
 func (UnimplementedChicommServer) ListOrders(context.Context, *OrderReq) (*ListOrderRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrders not implemented")
+}
+func (UnimplementedChicommServer) UpdateOrderStatus(context.Context, *OrderReq) (*OrderRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrderStatus not implemented")
 }
 func (UnimplementedChicommServer) DeleteOrder(context.Context, *OrderReq) (*OrderRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrder not implemented")
@@ -498,6 +514,24 @@ func _Chicomm_ListOrders_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChicommServer).ListOrders(ctx, req.(*OrderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chicomm_UpdateOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChicommServer).UpdateOrderStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chicomm_UpdateOrderStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChicommServer).UpdateOrderStatus(ctx, req.(*OrderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -720,6 +754,10 @@ var Chicomm_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListOrders",
 			Handler:    _Chicomm_ListOrders_Handler,
+		},
+		{
+			MethodName: "UpdateOrderStatus",
+			Handler:    _Chicomm_UpdateOrderStatus_Handler,
 		},
 		{
 			MethodName: "DeleteOrder",
