@@ -2,6 +2,9 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/hnsia/chicomm/chicomm-grpc/pb"
 	"github.com/hnsia/chicomm/chicomm-grpc/storer"
@@ -104,6 +107,34 @@ func (s *Server) ListOrders(ctx context.Context, o *pb.OrderReq) (*pb.ListOrderR
 	}
 
 	return &pb.ListOrderRes{Orders: res}, nil
+}
+
+func (s *Server) UpdateOrderStatus(ctx context.Context, o *pb.OrderReq) (*pb.OrderRes, error) {
+	// validate the order req
+	order, err := s.storer.GetOrderStatusByID(ctx, o.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	if o.GetUserId() != order.UserID {
+		return nil, fmt.Errorf("order %d does not belong to user %d", o.GetId(), o.GetUserId())
+	}
+
+	sOrderStatus := storer.OrderStatus(strings.ToLower(o.GetStatus().String()))
+	if sOrderStatus == order.Status {
+		return nil, fmt.Errorf("order status is already %s", order.Status)
+	}
+
+	order.Status = sOrderStatus
+	order.UpdatedAt = toTimePtr(time.Now())
+	updatedOrder, err := s.storer.UpdateOrderStatus(ctx, order)
+	if err != nil {
+		return nil, err
+	}
+
+	// enqueue notification event
+
+	return toPBOrderRes(updatedOrder), nil
 }
 
 func (s *Server) DeleteOrder(ctx context.Context, o *pb.OrderReq) (*pb.OrderRes, error) {
