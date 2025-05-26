@@ -184,6 +184,37 @@ func (h *handler) listOrders(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func (h *handler) updateOrderStatus(w http.ResponseWriter, r *http.Request) {
+	claims := r.Context().Value(authKey{}).(*token.UserClaims)
+
+	var o OrderReq
+	if err := json.NewDecoder(r.Body).Decode(&o); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	status, err := toPBOrderStatus(OrderStatus(o.Status))
+	if err != nil {
+		http.Error(w, "invalid status", http.StatusBadRequest)
+		return
+	}
+
+	res, err := h.client.UpdateOrderStatus(h.ctx, &pb.OrderReq{
+		Id:        o.ID,
+		UserId:    claims.ID,
+		UserEmail: claims.Email,
+		Status:    status,
+	})
+	if err != nil {
+		http.Error(w, "error updating order status", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}
+
 func (h *handler) deleteOrder(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	i, err := strconv.ParseInt(id, 10, 64)
