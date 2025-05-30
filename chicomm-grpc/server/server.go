@@ -82,6 +82,17 @@ func (s *Server) CreateOrder(ctx context.Context, o *pb.OrderReq) (*pb.OrderRes,
 	if err != nil {
 		return nil, err
 	}
+	order.Status = storer.Pending
+
+	_, err = s.storer.EnqueueNotificationEvent(ctx, &storer.NotificationEvent{
+		UserEmail:   o.GetUserEmail(),
+		OrderStatus: order.Status,
+		OrderID:     order.ID,
+		Attempts:    0,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return toPBOrderRes(order), nil
 }
@@ -133,6 +144,15 @@ func (s *Server) UpdateOrderStatus(ctx context.Context, o *pb.OrderReq) (*pb.Ord
 	}
 
 	// enqueue notification event
+	_, err = s.storer.EnqueueNotificationEvent(ctx, &storer.NotificationEvent{
+		UserEmail:   o.GetUserEmail(),
+		OrderStatus: order.Status,
+		OrderID:     order.ID,
+		Attempts:    0,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return toPBOrderRes(updatedOrder), nil
 }

@@ -330,3 +330,69 @@ func (ms *MySQLStorer) DeleteSession(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func insertNotificationState(ctx context.Context, tx *sqlx.Tx, ns *NotificationState) (*NotificationState, error) {
+	res, err := tx.NamedExecContext(ctx, `
+		INSERT INTO notification_states (order_id, state, message)
+		VALUES (:order_id, :state, :message)
+	`, ns)
+	if err != nil {
+		return nil, fmt.Errorf("error inserting notification state: %w", err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("error getting last insert id: %w", err)
+	}
+	ns.ID = id
+
+	return ns, nil
+}
+
+func insertNotificationEvent(ctx context.Context, tx *sqlx.Tx, ne *NotificationEvent) (*NotificationEvent, error) {
+	res, err := tx.NamedExecContext(ctx, `
+		INSERT INTO notification_events_queue (user_email, order_status, order_id, state_id, attempts)
+		VALUES (:user_email, :order_status, :order_id, :state_id, :attempts)
+	`, ne)
+	if err != nil {
+		return nil, fmt.Errorf("error inserting notification event: %w", err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("error getting last insert id: %w", err)
+	}
+	ne.ID = id
+
+	return ne, nil
+}
+
+func (ms *MySQLStorer) EnqueueNotificationEvent(ctx context.Context, ne *NotificationEvent) (*NotificationEvent, error) {
+	var ev *NotificationEvent
+	// insert a notification state and a notification event in the queue in a database transaction
+	err := ms.execTx(ctx, func(tx *sqlx.Tx) error {
+		// insert into notification_states
+		ns, err := insertNotificationState(ctx, tx, &NotificationState{
+			OrderID: ne.OrderID,
+			State:   NotSent,
+			Message: "",
+		})
+		if err != nil {
+			return fmt.Errorf("error inserting notification state: %w", err)
+		}
+		ne.StateID = ns.ID
+
+		// insert into notification_events_queue
+		ev, err = insertNotificationEvent(ctx, tx, ne)
+		if err != nil {
+			return fmt.Errorf("error inserting notification event: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error enqueuing notification event: %w", err)
+	}
+
+	return ev, nil
+}

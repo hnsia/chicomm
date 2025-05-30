@@ -139,6 +139,7 @@ func (h *handler) createOrder(w http.ResponseWriter, r *http.Request) {
 	claims := r.Context().Value(authKey{}).(*token.UserClaims)
 	po := toPBOrderReq(o)
 	po.UserId = claims.ID
+	po.UserEmail = claims.Email
 
 	createdOrder, err := h.client.CreateOrder(h.ctx, po)
 	if err != nil {
