@@ -276,3 +276,52 @@ func (s *Server) DeleteSession(ctx context.Context, sr *pb.SessionReq) (*pb.Sess
 
 	return &pb.SessionRes{}, nil
 }
+
+func (s *Server) ListNotificationEvents(ctx context.Context, lnr *pb.ListNotificationEventsReq) (*pb.ListNotificationEventsRes, error) {
+	notificationEvents, err := s.storer.ListNotificationEvents(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	neList := make([]*pb.NotificationEvent, 0, len(notificationEvents))
+	for _, e := range notificationEvents {
+		neList = append(neList, &pb.NotificationEvent{
+			Id:          e.ID,
+			UserEmail:   e.UserEmail,
+			OrderStatus: toPBOrderStatus(e.OrderStatus),
+			OrderId:     e.OrderID,
+			StateId:     e.StateID,
+			Attempts:    e.Attempts,
+		})
+	}
+
+	return &pb.ListNotificationEventsRes{Events: neList}, nil
+}
+
+func (s *Server) UpdateNotificationEvent(ctx context.Context, unr *pb.UpdateNotificationEventReq) (*pb.UpdateNotificationEventRes, error) {
+	var responseType storer.NotificationResponseType
+	switch unr.ResponseType {
+	case pb.NotificationResponseType_SUCCESS:
+		responseType = storer.NotificationSuccess
+	case pb.NotificationResponseType_FAILURE:
+		responseType = storer.NotificationFailure
+	default:
+		return nil, fmt.Errorf("invalid response type: %s", unr.ResponseType.String())
+	}
+
+	succeeded, err := s.storer.UpdateNotificationEvent(ctx,
+		&storer.NotificationEvent{
+			ID:      unr.GetId(),
+			StateID: unr.GetStateId(),
+		},
+		&storer.NotificationState{
+			Message: unr.GetMessage(),
+		},
+		responseType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateNotificationEventRes{Succeeded: succeeded}, nil
+}
