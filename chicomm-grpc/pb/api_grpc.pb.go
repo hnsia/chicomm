@@ -19,25 +19,27 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Chicomm_CreateProduct_FullMethodName     = "/pb.chicomm/CreateProduct"
-	Chicomm_GetProduct_FullMethodName        = "/pb.chicomm/GetProduct"
-	Chicomm_ListProducts_FullMethodName      = "/pb.chicomm/ListProducts"
-	Chicomm_UpdateProduct_FullMethodName     = "/pb.chicomm/UpdateProduct"
-	Chicomm_DeleteProduct_FullMethodName     = "/pb.chicomm/DeleteProduct"
-	Chicomm_CreateOrder_FullMethodName       = "/pb.chicomm/CreateOrder"
-	Chicomm_GetOrder_FullMethodName          = "/pb.chicomm/GetOrder"
-	Chicomm_ListOrders_FullMethodName        = "/pb.chicomm/ListOrders"
-	Chicomm_UpdateOrderStatus_FullMethodName = "/pb.chicomm/UpdateOrderStatus"
-	Chicomm_DeleteOrder_FullMethodName       = "/pb.chicomm/DeleteOrder"
-	Chicomm_CreateUser_FullMethodName        = "/pb.chicomm/CreateUser"
-	Chicomm_GetUser_FullMethodName           = "/pb.chicomm/GetUser"
-	Chicomm_ListUsers_FullMethodName         = "/pb.chicomm/ListUsers"
-	Chicomm_UpdateUser_FullMethodName        = "/pb.chicomm/UpdateUser"
-	Chicomm_DeleteUser_FullMethodName        = "/pb.chicomm/DeleteUser"
-	Chicomm_CreateSession_FullMethodName     = "/pb.chicomm/CreateSession"
-	Chicomm_GetSession_FullMethodName        = "/pb.chicomm/GetSession"
-	Chicomm_RevokeSession_FullMethodName     = "/pb.chicomm/RevokeSession"
-	Chicomm_DeleteSession_FullMethodName     = "/pb.chicomm/DeleteSession"
+	Chicomm_CreateProduct_FullMethodName           = "/pb.chicomm/CreateProduct"
+	Chicomm_GetProduct_FullMethodName              = "/pb.chicomm/GetProduct"
+	Chicomm_ListProducts_FullMethodName            = "/pb.chicomm/ListProducts"
+	Chicomm_UpdateProduct_FullMethodName           = "/pb.chicomm/UpdateProduct"
+	Chicomm_DeleteProduct_FullMethodName           = "/pb.chicomm/DeleteProduct"
+	Chicomm_CreateOrder_FullMethodName             = "/pb.chicomm/CreateOrder"
+	Chicomm_GetOrder_FullMethodName                = "/pb.chicomm/GetOrder"
+	Chicomm_ListOrders_FullMethodName              = "/pb.chicomm/ListOrders"
+	Chicomm_UpdateOrderStatus_FullMethodName       = "/pb.chicomm/UpdateOrderStatus"
+	Chicomm_DeleteOrder_FullMethodName             = "/pb.chicomm/DeleteOrder"
+	Chicomm_CreateUser_FullMethodName              = "/pb.chicomm/CreateUser"
+	Chicomm_GetUser_FullMethodName                 = "/pb.chicomm/GetUser"
+	Chicomm_ListUsers_FullMethodName               = "/pb.chicomm/ListUsers"
+	Chicomm_UpdateUser_FullMethodName              = "/pb.chicomm/UpdateUser"
+	Chicomm_DeleteUser_FullMethodName              = "/pb.chicomm/DeleteUser"
+	Chicomm_CreateSession_FullMethodName           = "/pb.chicomm/CreateSession"
+	Chicomm_GetSession_FullMethodName              = "/pb.chicomm/GetSession"
+	Chicomm_RevokeSession_FullMethodName           = "/pb.chicomm/RevokeSession"
+	Chicomm_DeleteSession_FullMethodName           = "/pb.chicomm/DeleteSession"
+	Chicomm_ListNotificationEvents_FullMethodName  = "/pb.chicomm/ListNotificationEvents"
+	Chicomm_UpdateNotificationEvent_FullMethodName = "/pb.chicomm/UpdateNotificationEvent"
 )
 
 // ChicommClient is the client API for Chicomm service.
@@ -63,6 +65,8 @@ type ChicommClient interface {
 	GetSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
 	RevokeSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
 	DeleteSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
+	ListNotificationEvents(ctx context.Context, in *ListNotificationEventsReq, opts ...grpc.CallOption) (*ListNotificationEventsRes, error)
+	UpdateNotificationEvent(ctx context.Context, in *UpdateNotificationEventReq, opts ...grpc.CallOption) (*UpdateNotificationEventRes, error)
 }
 
 type chicommClient struct {
@@ -263,6 +267,26 @@ func (c *chicommClient) DeleteSession(ctx context.Context, in *SessionReq, opts 
 	return out, nil
 }
 
+func (c *chicommClient) ListNotificationEvents(ctx context.Context, in *ListNotificationEventsReq, opts ...grpc.CallOption) (*ListNotificationEventsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNotificationEventsRes)
+	err := c.cc.Invoke(ctx, Chicomm_ListNotificationEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chicommClient) UpdateNotificationEvent(ctx context.Context, in *UpdateNotificationEventReq, opts ...grpc.CallOption) (*UpdateNotificationEventRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateNotificationEventRes)
+	err := c.cc.Invoke(ctx, Chicomm_UpdateNotificationEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChicommServer is the server API for Chicomm service.
 // All implementations must embed UnimplementedChicommServer
 // for forward compatibility.
@@ -286,6 +310,8 @@ type ChicommServer interface {
 	GetSession(context.Context, *SessionReq) (*SessionRes, error)
 	RevokeSession(context.Context, *SessionReq) (*SessionRes, error)
 	DeleteSession(context.Context, *SessionReq) (*SessionRes, error)
+	ListNotificationEvents(context.Context, *ListNotificationEventsReq) (*ListNotificationEventsRes, error)
+	UpdateNotificationEvent(context.Context, *UpdateNotificationEventReq) (*UpdateNotificationEventRes, error)
 	mustEmbedUnimplementedChicommServer()
 }
 
@@ -352,6 +378,12 @@ func (UnimplementedChicommServer) RevokeSession(context.Context, *SessionReq) (*
 }
 func (UnimplementedChicommServer) DeleteSession(context.Context, *SessionReq) (*SessionRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteSession not implemented")
+}
+func (UnimplementedChicommServer) ListNotificationEvents(context.Context, *ListNotificationEventsReq) (*ListNotificationEventsRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNotificationEvents not implemented")
+}
+func (UnimplementedChicommServer) UpdateNotificationEvent(context.Context, *UpdateNotificationEventReq) (*UpdateNotificationEventRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateNotificationEvent not implemented")
 }
 func (UnimplementedChicommServer) mustEmbedUnimplementedChicommServer() {}
 func (UnimplementedChicommServer) testEmbeddedByValue()                 {}
@@ -716,6 +748,42 @@ func _Chicomm_DeleteSession_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chicomm_ListNotificationEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationEventsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChicommServer).ListNotificationEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chicomm_ListNotificationEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChicommServer).ListNotificationEvents(ctx, req.(*ListNotificationEventsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chicomm_UpdateNotificationEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateNotificationEventReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChicommServer).UpdateNotificationEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chicomm_UpdateNotificationEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChicommServer).UpdateNotificationEvent(ctx, req.(*UpdateNotificationEventReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chicomm_ServiceDesc is the grpc.ServiceDesc for Chicomm service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -798,6 +866,14 @@ var Chicomm_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteSession",
 			Handler:    _Chicomm_DeleteSession_Handler,
+		},
+		{
+			MethodName: "ListNotificationEvents",
+			Handler:    _Chicomm_ListNotificationEvents_Handler,
+		},
+		{
+			MethodName: "UpdateNotificationEvent",
+			Handler:    _Chicomm_UpdateNotificationEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

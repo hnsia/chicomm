@@ -3,8 +3,13 @@ package storer
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
+)
+
+const (
+	maxAttempts = 3
 )
 
 type MySQLStorer struct {
@@ -395,4 +400,119 @@ func (ms *MySQLStorer) EnqueueNotificationEvent(ctx context.Context, ne *Notific
 	}
 
 	return ev, nil
+}
+
+func (ms *MySQLStorer) ListNotificationEvents(ctx context.Context) ([]*NotificationEvent, error) {
+	var events []*NotificationEvent
+
+	q := fmt.Sprintf("SELECT * FROM notification_events_queue WHERE attempts < %d ORDER BY created_at", maxAttempts)
+	err := ms.db.SelectContext(ctx, &events, q)
+	if err != nil {
+		return nil, fmt.Errorf("error listing notification events: %w", err)
+	}
+
+	return events, nil
+}
+
+func getNotificationEventAttempts(ctx context.Context, tx *sqlx.Tx, id int64) (*NotificationEvent, error) {
+	var ne NotificationEvent
+	err := tx.GetContext(ctx, &ne, "SELECT id, attempts FROM notification_events_queue WHERE id=?", id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting notification event: %w", err)
+	}
+
+	return &ne, nil
+}
+
+func updateNotificationEventAttempts(ctx context.Context, tx *sqlx.Tx, ne *NotificationEvent) (*NotificationEvent, error) {
+	_, err := tx.NamedExecContext(ctx, "UPDATE notification_events_queue SET attempts=:attempts, updated_at=:updated_at WHERE id=:id", ne)
+	if err != nil {
+		return nil, fmt.Errorf("error updating notification event attempts: %w", err)
+	}
+
+	return ne, nil
+}
+
+func deleteNotificationEvent(ctx context.Context, tx *sqlx.Tx, id int64) error {
+	_, err := tx.ExecContext(ctx, "DELETE FROM notification_events_queue WHERE id=?", id)
+	if err != nil {
+		return fmt.Errorf("error deleting notification event: %w", err)
+	}
+
+	return nil
+}
+
+func updateNotificationState(ctx context.Context, tx *sqlx.Tx, es *NotificationState) error {
+	q := "UPDATE notification_states SET state=:state, message=:message WHERE id=:id"
+	if es.State == Sent {
+		t := time.Now()
+		es.CompletedAt = &t
+		q = "UPDATE notification_states SET state=:state, message=:message, completed_at=:completed_at WHERE id=:id"
+	}
+
+	_, err := tx.NamedExecContext(ctx, q, es)
+	if err != nil {
+		return fmt.Errorf("error updating notification state: %w", err)
+	}
+
+	return nil
+}
+
+func (ms *MySQLStorer) UpdateNotificationEvent(ctx context.Context, ev *NotificationEvent, es *NotificationState, responseType NotificationResponseType) (bool, error) {
+	succeeded := false
+	err := ms.execTx(ctx, func(tx *sqlx.Tx) error {
+		switch responseType {
+		case NotificationSuccess:
+			err := updateNotificationState(ctx, tx, &NotificationState{
+				ID:      ev.StateID,
+				State:   Sent,
+				Message: es.Message,
+			})
+			if err != nil {
+				return fmt.Errorf("error updating notification state: %w", err)
+			}
+
+			err = deleteNotificationEvent(ctx, tx, ev.ID)
+			if err != nil {
+				return fmt.Errorf("error deleting notification event: %w", err)
+			}
+			succeeded = true
+		case NotificationFailure:
+			u, err := getNotificationEventAttempts(ctx, tx, ev.ID)
+			if err != nil {
+				return fmt.Errorf("error getting notification event: %w", err)
+			}
+
+			if u.Attempts+1 < maxAttempts {
+				t := time.Now()
+				u.UpdatedAt = &t
+				u.Attempts += 1
+
+				_, err := updateNotificationEventAttempts(ctx, tx, u)
+				if err != nil {
+					return fmt.Errorf("error updating notification event attempts: %w", err)
+				}
+			} else {
+				err = updateNotificationState(ctx, tx, &NotificationState{
+					ID:      ev.StateID,
+					State:   Failed,
+					Message: es.Message,
+				})
+				if err != nil {
+					return fmt.Errorf("error updating notification state: %w", err)
+				}
+
+				err = deleteNotificationEvent(ctx, tx, u.ID)
+				if err != nil {
+					return fmt.Errorf("error deleting notification event: %w", err)
+				}
+			}
+		default:
+			return fmt.Errorf("invalid notification response type: %v", responseType)
+		}
+
+		return nil
+	})
+
+	return succeeded, err
 }

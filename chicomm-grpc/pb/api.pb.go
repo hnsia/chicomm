@@ -71,6 +71,52 @@ func (OrderStatus) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_rawDescGZIP(), []int{0}
 }
 
+type NotificationResponseType int32
+
+const (
+	NotificationResponseType_SUCCESS NotificationResponseType = 0
+	NotificationResponseType_FAILURE NotificationResponseType = 1
+)
+
+// Enum value maps for NotificationResponseType.
+var (
+	NotificationResponseType_name = map[int32]string{
+		0: "SUCCESS",
+		1: "FAILURE",
+	}
+	NotificationResponseType_value = map[string]int32{
+		"SUCCESS": 0,
+		"FAILURE": 1,
+	}
+)
+
+func (x NotificationResponseType) Enum() *NotificationResponseType {
+	p := new(NotificationResponseType)
+	*p = x
+	return p
+}
+
+func (x NotificationResponseType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (NotificationResponseType) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_proto_enumTypes[1].Descriptor()
+}
+
+func (NotificationResponseType) Type() protoreflect.EnumType {
+	return &file_api_proto_enumTypes[1]
+}
+
+func (x NotificationResponseType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use NotificationResponseType.Descriptor instead.
+func (NotificationResponseType) EnumDescriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{1}
+}
+
 type ProductReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1047,6 +1093,290 @@ func (x *SessionRes) GetExpiresAt() *timestamp.Timestamp {
 	return nil
 }
 
+type NotificationEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserEmail     string                 `protobuf:"bytes,2,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
+	OrderStatus   OrderStatus            `protobuf:"varint,3,opt,name=order_status,json=orderStatus,proto3,enum=pb.OrderStatus" json:"order_status,omitempty"`
+	OrderId       int64                  `protobuf:"varint,4,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	StateId       int64                  `protobuf:"varint,5,opt,name=state_id,json=stateId,proto3" json:"state_id,omitempty"`
+	Attempts      int64                  `protobuf:"varint,6,opt,name=attempts,proto3" json:"attempts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationEvent) Reset() {
+	*x = NotificationEvent{}
+	mi := &file_api_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationEvent) ProtoMessage() {}
+
+func (x *NotificationEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationEvent.ProtoReflect.Descriptor instead.
+func (*NotificationEvent) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *NotificationEvent) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *NotificationEvent) GetUserEmail() string {
+	if x != nil {
+		return x.UserEmail
+	}
+	return ""
+}
+
+func (x *NotificationEvent) GetOrderStatus() OrderStatus {
+	if x != nil {
+		return x.OrderStatus
+	}
+	return OrderStatus_PENDING
+}
+
+func (x *NotificationEvent) GetOrderId() int64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+func (x *NotificationEvent) GetStateId() int64 {
+	if x != nil {
+		return x.StateId
+	}
+	return 0
+}
+
+func (x *NotificationEvent) GetAttempts() int64 {
+	if x != nil {
+		return x.Attempts
+	}
+	return 0
+}
+
+type ListNotificationEventsReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationEventsReq) Reset() {
+	*x = ListNotificationEventsReq{}
+	mi := &file_api_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationEventsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationEventsReq) ProtoMessage() {}
+
+func (x *ListNotificationEventsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationEventsReq.ProtoReflect.Descriptor instead.
+func (*ListNotificationEventsReq) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{13}
+}
+
+type ListNotificationEventsRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*NotificationEvent   `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationEventsRes) Reset() {
+	*x = ListNotificationEventsRes{}
+	mi := &file_api_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationEventsRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationEventsRes) ProtoMessage() {}
+
+func (x *ListNotificationEventsRes) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationEventsRes.ProtoReflect.Descriptor instead.
+func (*ListNotificationEventsRes) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListNotificationEventsRes) GetEvents() []*NotificationEvent {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+type UpdateNotificationEventReq struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Id            int64                    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	StateId       int64                    `protobuf:"varint,2,opt,name=state_id,json=stateId,proto3" json:"state_id,omitempty"`
+	OrderId       int64                    `protobuf:"varint,3,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	ResponseType  NotificationResponseType `protobuf:"varint,4,opt,name=response_type,json=responseType,proto3,enum=pb.NotificationResponseType" json:"response_type,omitempty"`
+	Message       string                   `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateNotificationEventReq) Reset() {
+	*x = UpdateNotificationEventReq{}
+	mi := &file_api_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNotificationEventReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNotificationEventReq) ProtoMessage() {}
+
+func (x *UpdateNotificationEventReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNotificationEventReq.ProtoReflect.Descriptor instead.
+func (*UpdateNotificationEventReq) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *UpdateNotificationEventReq) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateNotificationEventReq) GetStateId() int64 {
+	if x != nil {
+		return x.StateId
+	}
+	return 0
+}
+
+func (x *UpdateNotificationEventReq) GetOrderId() int64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+func (x *UpdateNotificationEventReq) GetResponseType() NotificationResponseType {
+	if x != nil {
+		return x.ResponseType
+	}
+	return NotificationResponseType_SUCCESS
+}
+
+func (x *UpdateNotificationEventReq) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type UpdateNotificationEventRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Succeeded     bool                   `protobuf:"varint,1,opt,name=succeeded,proto3" json:"succeeded,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateNotificationEventRes) Reset() {
+	*x = UpdateNotificationEventRes{}
+	mi := &file_api_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNotificationEventRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNotificationEventRes) ProtoMessage() {}
+
+func (x *UpdateNotificationEventRes) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNotificationEventRes.ProtoReflect.Descriptor instead.
+func (*UpdateNotificationEventRes) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *UpdateNotificationEventRes) GetSucceeded() bool {
+	if x != nil {
+		return x.Succeeded
+	}
+	return false
+}
+
 var File_api_proto protoreflect.FileDescriptor
 
 const file_api_proto_rawDesc = "" +
@@ -1154,11 +1484,33 @@ const file_api_proto_rawDesc = "" +
 	"\n" +
 	"is_revoked\x18\x04 \x01(\bR\tisRevoked\x129\n" +
 	"\n" +
-	"expires_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt*6\n" +
+	"expires_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\xc8\x01\n" +
+	"\x11NotificationEvent\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"user_email\x18\x02 \x01(\tR\tuserEmail\x122\n" +
+	"\forder_status\x18\x03 \x01(\x0e2\x0f.pb.OrderStatusR\vorderStatus\x12\x19\n" +
+	"\border_id\x18\x04 \x01(\x03R\aorderId\x12\x19\n" +
+	"\bstate_id\x18\x05 \x01(\x03R\astateId\x12\x1a\n" +
+	"\battempts\x18\x06 \x01(\x03R\battempts\"\x1b\n" +
+	"\x19ListNotificationEventsReq\"J\n" +
+	"\x19ListNotificationEventsRes\x12-\n" +
+	"\x06events\x18\x01 \x03(\v2\x15.pb.NotificationEventR\x06events\"\xbf\x01\n" +
+	"\x1aUpdateNotificationEventReq\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bstate_id\x18\x02 \x01(\x03R\astateId\x12\x19\n" +
+	"\border_id\x18\x03 \x01(\x03R\aorderId\x12A\n" +
+	"\rresponse_type\x18\x04 \x01(\x0e2\x1c.pb.NotificationResponseTypeR\fresponseType\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\":\n" +
+	"\x1aUpdateNotificationEventRes\x12\x1c\n" +
+	"\tsucceeded\x18\x01 \x01(\bR\tsucceeded*6\n" +
 	"\vOrderStatus\x12\v\n" +
 	"\aPENDING\x10\x00\x12\v\n" +
 	"\aSHIPPED\x10\x01\x12\r\n" +
-	"\tDELIVERED\x10\x022\x8a\a\n" +
+	"\tDELIVERED\x10\x02*4\n" +
+	"\x18NotificationResponseType\x12\v\n" +
+	"\aSUCCESS\x10\x00\x12\v\n" +
+	"\aFAILURE\x10\x012\xc1\b\n" +
 	"\achicomm\x121\n" +
 	"\rCreateProduct\x12\x0e.pb.ProductReq\x1a\x0e.pb.ProductRes\"\x00\x12.\n" +
 	"\n" +
@@ -1184,7 +1536,9 @@ const file_api_proto_rawDesc = "" +
 	"\n" +
 	"GetSession\x12\x0e.pb.SessionReq\x1a\x0e.pb.SessionRes\"\x00\x121\n" +
 	"\rRevokeSession\x12\x0e.pb.SessionReq\x1a\x0e.pb.SessionRes\"\x00\x121\n" +
-	"\rDeleteSession\x12\x0e.pb.SessionReq\x1a\x0e.pb.SessionRes\"\x00B*Z(github.com/hnsia/chicomm/chicomm-grpc/pbb\x06proto3"
+	"\rDeleteSession\x12\x0e.pb.SessionReq\x1a\x0e.pb.SessionRes\"\x00\x12X\n" +
+	"\x16ListNotificationEvents\x12\x1d.pb.ListNotificationEventsReq\x1a\x1d.pb.ListNotificationEventsRes\"\x00\x12[\n" +
+	"\x17UpdateNotificationEvent\x12\x1e.pb.UpdateNotificationEventReq\x1a\x1e.pb.UpdateNotificationEventRes\"\x00B*Z(github.com/hnsia/chicomm/chicomm-grpc/pbb\x06proto3"
 
 var (
 	file_api_proto_rawDescOnce sync.Once
@@ -1198,82 +1552,95 @@ func file_api_proto_rawDescGZIP() []byte {
 	return file_api_proto_rawDescData
 }
 
-var file_api_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_api_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_api_proto_goTypes = []any{
-	(OrderStatus)(0),            // 0: pb.OrderStatus
-	(*ProductReq)(nil),          // 1: pb.ProductReq
-	(*ProductRes)(nil),          // 2: pb.ProductRes
-	(*ListProductRes)(nil),      // 3: pb.ListProductRes
-	(*OrderItem)(nil),           // 4: pb.OrderItem
-	(*OrderReq)(nil),            // 5: pb.OrderReq
-	(*OrderRes)(nil),            // 6: pb.OrderRes
-	(*ListOrderRes)(nil),        // 7: pb.ListOrderRes
-	(*UserReq)(nil),             // 8: pb.UserReq
-	(*UserRes)(nil),             // 9: pb.UserRes
-	(*ListUserRes)(nil),         // 10: pb.ListUserRes
-	(*SessionReq)(nil),          // 11: pb.SessionReq
-	(*SessionRes)(nil),          // 12: pb.SessionRes
-	(*timestamp.Timestamp)(nil), // 13: google.protobuf.Timestamp
+	(OrderStatus)(0),                   // 0: pb.OrderStatus
+	(NotificationResponseType)(0),      // 1: pb.NotificationResponseType
+	(*ProductReq)(nil),                 // 2: pb.ProductReq
+	(*ProductRes)(nil),                 // 3: pb.ProductRes
+	(*ListProductRes)(nil),             // 4: pb.ListProductRes
+	(*OrderItem)(nil),                  // 5: pb.OrderItem
+	(*OrderReq)(nil),                   // 6: pb.OrderReq
+	(*OrderRes)(nil),                   // 7: pb.OrderRes
+	(*ListOrderRes)(nil),               // 8: pb.ListOrderRes
+	(*UserReq)(nil),                    // 9: pb.UserReq
+	(*UserRes)(nil),                    // 10: pb.UserRes
+	(*ListUserRes)(nil),                // 11: pb.ListUserRes
+	(*SessionReq)(nil),                 // 12: pb.SessionReq
+	(*SessionRes)(nil),                 // 13: pb.SessionRes
+	(*NotificationEvent)(nil),          // 14: pb.NotificationEvent
+	(*ListNotificationEventsReq)(nil),  // 15: pb.ListNotificationEventsReq
+	(*ListNotificationEventsRes)(nil),  // 16: pb.ListNotificationEventsRes
+	(*UpdateNotificationEventReq)(nil), // 17: pb.UpdateNotificationEventReq
+	(*UpdateNotificationEventRes)(nil), // 18: pb.UpdateNotificationEventRes
+	(*timestamp.Timestamp)(nil),        // 19: google.protobuf.Timestamp
 }
 var file_api_proto_depIdxs = []int32{
-	13, // 0: pb.ProductRes.created_at:type_name -> google.protobuf.Timestamp
-	13, // 1: pb.ProductRes.updated_at:type_name -> google.protobuf.Timestamp
-	2,  // 2: pb.ListProductRes.products:type_name -> pb.ProductRes
-	4,  // 3: pb.OrderReq.items:type_name -> pb.OrderItem
+	19, // 0: pb.ProductRes.created_at:type_name -> google.protobuf.Timestamp
+	19, // 1: pb.ProductRes.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 2: pb.ListProductRes.products:type_name -> pb.ProductRes
+	5,  // 3: pb.OrderReq.items:type_name -> pb.OrderItem
 	0,  // 4: pb.OrderReq.status:type_name -> pb.OrderStatus
-	4,  // 5: pb.OrderRes.items:type_name -> pb.OrderItem
-	13, // 6: pb.OrderRes.created_at:type_name -> google.protobuf.Timestamp
-	13, // 7: pb.OrderRes.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 5: pb.OrderRes.items:type_name -> pb.OrderItem
+	19, // 6: pb.OrderRes.created_at:type_name -> google.protobuf.Timestamp
+	19, // 7: pb.OrderRes.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 8: pb.OrderRes.status:type_name -> pb.OrderStatus
-	6,  // 9: pb.ListOrderRes.orders:type_name -> pb.OrderRes
-	13, // 10: pb.UserRes.created_at:type_name -> google.protobuf.Timestamp
-	9,  // 11: pb.ListUserRes.users:type_name -> pb.UserRes
-	13, // 12: pb.SessionReq.expires_at:type_name -> google.protobuf.Timestamp
-	13, // 13: pb.SessionRes.expires_at:type_name -> google.protobuf.Timestamp
-	1,  // 14: pb.chicomm.CreateProduct:input_type -> pb.ProductReq
-	1,  // 15: pb.chicomm.GetProduct:input_type -> pb.ProductReq
-	1,  // 16: pb.chicomm.ListProducts:input_type -> pb.ProductReq
-	1,  // 17: pb.chicomm.UpdateProduct:input_type -> pb.ProductReq
-	1,  // 18: pb.chicomm.DeleteProduct:input_type -> pb.ProductReq
-	5,  // 19: pb.chicomm.CreateOrder:input_type -> pb.OrderReq
-	5,  // 20: pb.chicomm.GetOrder:input_type -> pb.OrderReq
-	5,  // 21: pb.chicomm.ListOrders:input_type -> pb.OrderReq
-	5,  // 22: pb.chicomm.UpdateOrderStatus:input_type -> pb.OrderReq
-	5,  // 23: pb.chicomm.DeleteOrder:input_type -> pb.OrderReq
-	8,  // 24: pb.chicomm.CreateUser:input_type -> pb.UserReq
-	8,  // 25: pb.chicomm.GetUser:input_type -> pb.UserReq
-	8,  // 26: pb.chicomm.ListUsers:input_type -> pb.UserReq
-	8,  // 27: pb.chicomm.UpdateUser:input_type -> pb.UserReq
-	8,  // 28: pb.chicomm.DeleteUser:input_type -> pb.UserReq
-	11, // 29: pb.chicomm.CreateSession:input_type -> pb.SessionReq
-	11, // 30: pb.chicomm.GetSession:input_type -> pb.SessionReq
-	11, // 31: pb.chicomm.RevokeSession:input_type -> pb.SessionReq
-	11, // 32: pb.chicomm.DeleteSession:input_type -> pb.SessionReq
-	2,  // 33: pb.chicomm.CreateProduct:output_type -> pb.ProductRes
-	2,  // 34: pb.chicomm.GetProduct:output_type -> pb.ProductRes
-	3,  // 35: pb.chicomm.ListProducts:output_type -> pb.ListProductRes
-	2,  // 36: pb.chicomm.UpdateProduct:output_type -> pb.ProductRes
-	2,  // 37: pb.chicomm.DeleteProduct:output_type -> pb.ProductRes
-	6,  // 38: pb.chicomm.CreateOrder:output_type -> pb.OrderRes
-	6,  // 39: pb.chicomm.GetOrder:output_type -> pb.OrderRes
-	7,  // 40: pb.chicomm.ListOrders:output_type -> pb.ListOrderRes
-	6,  // 41: pb.chicomm.UpdateOrderStatus:output_type -> pb.OrderRes
-	6,  // 42: pb.chicomm.DeleteOrder:output_type -> pb.OrderRes
-	9,  // 43: pb.chicomm.CreateUser:output_type -> pb.UserRes
-	9,  // 44: pb.chicomm.GetUser:output_type -> pb.UserRes
-	10, // 45: pb.chicomm.ListUsers:output_type -> pb.ListUserRes
-	9,  // 46: pb.chicomm.UpdateUser:output_type -> pb.UserRes
-	9,  // 47: pb.chicomm.DeleteUser:output_type -> pb.UserRes
-	12, // 48: pb.chicomm.CreateSession:output_type -> pb.SessionRes
-	12, // 49: pb.chicomm.GetSession:output_type -> pb.SessionRes
-	12, // 50: pb.chicomm.RevokeSession:output_type -> pb.SessionRes
-	12, // 51: pb.chicomm.DeleteSession:output_type -> pb.SessionRes
-	33, // [33:52] is the sub-list for method output_type
-	14, // [14:33] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	7,  // 9: pb.ListOrderRes.orders:type_name -> pb.OrderRes
+	19, // 10: pb.UserRes.created_at:type_name -> google.protobuf.Timestamp
+	10, // 11: pb.ListUserRes.users:type_name -> pb.UserRes
+	19, // 12: pb.SessionReq.expires_at:type_name -> google.protobuf.Timestamp
+	19, // 13: pb.SessionRes.expires_at:type_name -> google.protobuf.Timestamp
+	0,  // 14: pb.NotificationEvent.order_status:type_name -> pb.OrderStatus
+	14, // 15: pb.ListNotificationEventsRes.events:type_name -> pb.NotificationEvent
+	1,  // 16: pb.UpdateNotificationEventReq.response_type:type_name -> pb.NotificationResponseType
+	2,  // 17: pb.chicomm.CreateProduct:input_type -> pb.ProductReq
+	2,  // 18: pb.chicomm.GetProduct:input_type -> pb.ProductReq
+	2,  // 19: pb.chicomm.ListProducts:input_type -> pb.ProductReq
+	2,  // 20: pb.chicomm.UpdateProduct:input_type -> pb.ProductReq
+	2,  // 21: pb.chicomm.DeleteProduct:input_type -> pb.ProductReq
+	6,  // 22: pb.chicomm.CreateOrder:input_type -> pb.OrderReq
+	6,  // 23: pb.chicomm.GetOrder:input_type -> pb.OrderReq
+	6,  // 24: pb.chicomm.ListOrders:input_type -> pb.OrderReq
+	6,  // 25: pb.chicomm.UpdateOrderStatus:input_type -> pb.OrderReq
+	6,  // 26: pb.chicomm.DeleteOrder:input_type -> pb.OrderReq
+	9,  // 27: pb.chicomm.CreateUser:input_type -> pb.UserReq
+	9,  // 28: pb.chicomm.GetUser:input_type -> pb.UserReq
+	9,  // 29: pb.chicomm.ListUsers:input_type -> pb.UserReq
+	9,  // 30: pb.chicomm.UpdateUser:input_type -> pb.UserReq
+	9,  // 31: pb.chicomm.DeleteUser:input_type -> pb.UserReq
+	12, // 32: pb.chicomm.CreateSession:input_type -> pb.SessionReq
+	12, // 33: pb.chicomm.GetSession:input_type -> pb.SessionReq
+	12, // 34: pb.chicomm.RevokeSession:input_type -> pb.SessionReq
+	12, // 35: pb.chicomm.DeleteSession:input_type -> pb.SessionReq
+	15, // 36: pb.chicomm.ListNotificationEvents:input_type -> pb.ListNotificationEventsReq
+	17, // 37: pb.chicomm.UpdateNotificationEvent:input_type -> pb.UpdateNotificationEventReq
+	3,  // 38: pb.chicomm.CreateProduct:output_type -> pb.ProductRes
+	3,  // 39: pb.chicomm.GetProduct:output_type -> pb.ProductRes
+	4,  // 40: pb.chicomm.ListProducts:output_type -> pb.ListProductRes
+	3,  // 41: pb.chicomm.UpdateProduct:output_type -> pb.ProductRes
+	3,  // 42: pb.chicomm.DeleteProduct:output_type -> pb.ProductRes
+	7,  // 43: pb.chicomm.CreateOrder:output_type -> pb.OrderRes
+	7,  // 44: pb.chicomm.GetOrder:output_type -> pb.OrderRes
+	8,  // 45: pb.chicomm.ListOrders:output_type -> pb.ListOrderRes
+	7,  // 46: pb.chicomm.UpdateOrderStatus:output_type -> pb.OrderRes
+	7,  // 47: pb.chicomm.DeleteOrder:output_type -> pb.OrderRes
+	10, // 48: pb.chicomm.CreateUser:output_type -> pb.UserRes
+	10, // 49: pb.chicomm.GetUser:output_type -> pb.UserRes
+	11, // 50: pb.chicomm.ListUsers:output_type -> pb.ListUserRes
+	10, // 51: pb.chicomm.UpdateUser:output_type -> pb.UserRes
+	10, // 52: pb.chicomm.DeleteUser:output_type -> pb.UserRes
+	13, // 53: pb.chicomm.CreateSession:output_type -> pb.SessionRes
+	13, // 54: pb.chicomm.GetSession:output_type -> pb.SessionRes
+	13, // 55: pb.chicomm.RevokeSession:output_type -> pb.SessionRes
+	13, // 56: pb.chicomm.DeleteSession:output_type -> pb.SessionRes
+	16, // 57: pb.chicomm.ListNotificationEvents:output_type -> pb.ListNotificationEventsRes
+	18, // 58: pb.chicomm.UpdateNotificationEvent:output_type -> pb.UpdateNotificationEventRes
+	38, // [38:59] is the sub-list for method output_type
+	17, // [17:38] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_init() }
@@ -1286,8 +1653,8 @@ func file_api_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_rawDesc), len(file_api_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   12,
+			NumEnums:      2,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -20,3 +20,8 @@ migrate-up:
 
 migrate-down:
 	docker run -it --rm --network host --volume "$(PWD)/db:/db" migrate/migrate:v4.17.0 -path=/db/migrations -database "mysql://root:password@tcp(localhost:3305)/chicomm" down $(n)
+
+grpc-codegen:
+	protoc --proto_path=chicomm-grpc/pb --go_out=chicomm-grpc/pb --go_opt=paths=source_relative \
+    --go-grpc_out=chicomm-grpc/pb --go-grpc_opt=paths=source_relative \
+    chicomm-grpc/pb/api.proto
