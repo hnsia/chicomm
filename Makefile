@@ -1,3 +1,5 @@
+include .env
+
 mysql-up:
 	docker run --name chicomm-mysql -p 3305:3306 -e MYSQL_ROOT_PASSWORD=password -d mysql:8.4
 
@@ -25,3 +27,12 @@ grpc-codegen:
 	protoc --proto_path=chicomm-grpc/pb --go_out=chicomm-grpc/pb --go_opt=paths=source_relative \
     --go-grpc_out=chicomm-grpc/pb --go-grpc_opt=paths=source_relative \
     chicomm-grpc/pb/api.proto
+
+run-grpc:
+	go run cmd/chicomm-grpc/main.go
+
+run-api:
+	go run cmd/chicomm-api/main.go
+
+run-notification:
+	ADMIN_EMAIL=$(ADMIN_EMAIL) ADMIN_PASS=$(ADMIN_PASS) go run cmd/chicomm-notification/main.go
