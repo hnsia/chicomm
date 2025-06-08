@@ -3,7 +3,7 @@
 mkdir -p dev/dist
 buildpids=""
 
-for f in ecomm-api ecomm-grpc ecomm-notification; do
+for f in chicomm-api chicomm-grpc chicomm-notification; do
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dev/dist/$f "./cmd/$f" &
 	buildpids+=" $!"
 done
@@ -14,5 +14,5 @@ for pid in $buildpids; do
 done
 
 image="hns.test/chicomm:latest"
-docker build -t "$image" -f Dockerfile.dev .
+docker build -t "$image" -f dev/Dockerfile.dev .
 echo "=> dev image built" > /dev/stderr
