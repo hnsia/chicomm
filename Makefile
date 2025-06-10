@@ -3,6 +3,9 @@ include .env
 mysql-up:
 	docker run --name chicomm-mysql -p 3305:3306 -e MYSQL_ROOT_PASSWORD=password -d mysql:8.4
 
+mysql-create-db:
+	docker exec -i chicomm-mysql mysql -uroot -ppassword <<< "CREATE DATABASE chicomm;"
+
 mysql-start:
 	docker start chicomm-mysql
 
