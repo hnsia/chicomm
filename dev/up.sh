@@ -24,5 +24,9 @@ docker-compose -f dev/docker-compose.yaml up -d mysql
 wait_for "docker-compose -f dev/docker-compose.yaml exec mysql mysql -uroot -ppassword -e 'SELECT 1;'"
 
 # apply migration files
+echo "=> applying migrations" > /dev/stderr
+dev/migrate up
 
 # bring up rest of the services
+echo "=> bringing up rest of the services" > /dev/stderr
+docker-compose -f dev/docker-compose.yaml up -d
