@@ -1,4 +1,5 @@
 # Chicomm
+This is a e-commerce dummy Golang project to explore chi-router, grpc, and sqlx.
 
 # Setup mysql
 
